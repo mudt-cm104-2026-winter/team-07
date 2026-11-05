@@ -28,6 +28,7 @@ The entries are kept in memory: after a restart the list is empty again.
 No real names: this repository is public. -->
 
 | GitHub | Role |
+|Ventspils|gamer|
 |---|---|
 
 ## How we work
