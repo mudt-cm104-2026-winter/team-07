@@ -29,6 +29,7 @@ No real names: this repository is public. -->
 
 | GitHub | Role |
 |Ventspils|gamer|
+|Pierrmon|Italian|
 |---|---|
 
 ## How we work
