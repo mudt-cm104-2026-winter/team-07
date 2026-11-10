@@ -40,3 +40,6 @@ def add(thing: str = Form(...), person: str = Form(...)):
     storage.add_entry(thing=thing.strip(), person=person.strip())
     # Back to the start page. 303 tells the browser: load it with GET.
     return RedirectResponse("/", status_code=303)
+
+
+questions = [{}, {}, {}, {}, {}]
