@@ -34,3 +34,13 @@ def save_score(new_score: int) -> int:
         json.dump(data, file, indent=4)
 
     return current_high
+
+
+def get_high_score() -> int:
+    """Returns just the high score to display on the result page."""
+    try:
+        with open(DATA_FILE, "r") as file:
+            data = json.load(file)
+            return data.get("high_score", 0)
+    except FileNotFoundError:
+        return 0
