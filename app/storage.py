@@ -8,11 +8,29 @@ this file can be replaced by one that keeps the entries somewhere else.
 As long as the function names stay the same, main.py does not change.
 """
 
-def load_highscores():
-    a = 'Abdul'
+import json
 
-def save_highscore(score):
-    c = 1
+DATA_FILE = "data.json"
 
-def top_highscores(n):
-    d = 2
+
+def save_score(new_score: int) -> int:
+    """Saves a new score, updates data.json, and returns the current high score."""
+    # 1. Load existing data or create default structure if file is missing
+    try:
+        with open(DATA_FILE, "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = {"scores": [], "high_score": 0}
+
+    # 2. Add the new score to the list
+    data["scores"].append(new_score)
+
+    # 3. Calculate the new high score
+    current_high = max(data["scores"])
+    data["high_score"] = current_high
+
+    # 4. Save back to data.json
+    with open(DATA_FILE, "w") as file:
+        json.dump(data, file, indent=4)
+
+    return current_high
