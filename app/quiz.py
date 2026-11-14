@@ -49,6 +49,24 @@ def validate_questions(questions):
             raise ValueError(f"Duplicate options: {item['question']!r}")
 
 
+# ===== NEW: used by the web routes in main.py (and by the terminal game) =====
+def get_questions():
+    """Return all questions, in random order."""
+    validate_questions(QUESTIONS)
+    return random.sample(QUESTIONS, k=len(QUESTIONS))
+
+
+def shuffled_options(item):
+    """Return the options of one question in random order."""
+    return random.sample(item["options"], k=len(item["options"]))
+
+
+def is_correct(item, choice):
+    """Return True if the chosen option text is the right answer."""
+    return choice == item["answer"]
+
+
+# ===== END NEW =====
 def read_input(prompt):
     try:
         text = input(prompt).strip()
@@ -86,22 +104,26 @@ def ask_yes_no(prompt):
 
 def ask_question(item, number, total):
     """Show one question (options shuffled). Return True if answered correctly."""
-    options = random.sample(item["options"], k=len(item["options"]))
+    options = shuffled_options(
+        item
+    )  # CHANGED: was random.sample(item["options"], k=len(item["options"]))
     print(f"\nQuestion {number}/{total}: {item['question']}")
     for i, option in enumerate(options, start=1):
         print(f"  {i}. {option}")
 
     picked = options[ask_choice(len(options))]
-    if picked == item["answer"]:
+    if is_correct(item, picked):  # CHANGED: was  if picked == item["answer"]:
         print("Correct!")
         return True
     print(f"Wrong! The correct answer is: {item['answer']}")
     return False
 
 
-def run_quiz(questions):
+def run_quiz():  # CHANGED: was  def run_quiz(questions):
     """Ask every question once in random order and print the score."""
-    order = random.sample(questions, k=len(questions))
+    order = (
+        get_questions()
+    )  # CHANGED: was  order = random.sample(questions, k=len(questions))
     score = answered = 0
     try:
         for number, item in enumerate(order, start=1):
@@ -118,7 +140,7 @@ def main():
     print("Welcome to the Quiz! (type q at any time to quit)")
     try:
         while True:
-            run_quiz(QUESTIONS)
+            run_quiz()  # CHANGED: was  run_quiz(QUESTIONS)
             if not ask_yes_no("\nPlay again?"):
                 break
     except QuitQuiz:
