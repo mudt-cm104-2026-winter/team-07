@@ -1,14 +1,13 @@
-"""Quiz Game: a multiple-choice quiz with shuffled questions and a highscore.
+"""Quiz Game: web routes for a multiple-choice quiz with a persistent highscore.
 
-What happens where:
-- main.py      the web part: which address shows what (the "routes")
-- quiz.py      the quiz logic (<github-username>)
-- storage.py   the highscore (<github-username>)
-- templates/   the HTML pages
-- static/      the stylesheet
+Module overview:
+- main.py      HTTP routes and game state
+- quiz.py      question data, shuffling and answer checking (<github-username>)
+- storage.py   highscore persistence in data.json (<github-username>)
+- templates/   HTML templates
+- static/      stylesheet
 """
 
-import random
 import uuid
 from pathlib import Path
 
@@ -17,8 +16,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-# CHANGE LATER: when quiz.py and storage.py are ready, add:
-# from . import quiz, storage
+from . import quiz, storage
 
 HERE = Path(__file__).parent
 
@@ -27,77 +25,122 @@ app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
 templates = Jinja2Templates(directory=HERE / "templates")
 
 
-# ===================================================================
-# GAME STATE
-# ===================================================================
-games = {}  # ticket number (game_id) -> that game's info
+# --- Game state -------------------------------------------------------
+
+# Active games, keyed by game ID. Kept in memory, so running games are
+# lost on restart. The highscore is persisted separately by storage.py.
+games = {}
 
 
 def find_game(game_id):
-    """Look up a game by its ticket number, or show 'not found'."""
+    # Return the game for the given ID or respond with 404 if it does not exist.
     game = games.get(game_id)
     if game is None:
         raise HTTPException(status_code=404, detail="Game not found")
     return game
 
 
-# ===================================================================
-# ROUTES
-# ===================================================================
+def current_question(game):
+    """Return the question the player is currently on."""
+    return game["questions"][game["index"]]
+
+
+# --- Routes -----------------------------------------------------------
+
+
 @app.get("/")
 def home():
-    """Start page with a Start button."""
-    # FRONT END LATER: show index.html
-    pass
+    # Start page.
+    # TODO (front end): render index.html
+    return {"page": "start", "highscore": storage.get_high_score()}
 
 
 @app.post("/start")
 def start_game():
-    """Start button pressed: create a new game."""
-    # 1. get the questions                          <- quiz.py
-    # 2. shuffle the order with random.shuffle      <- or quiz.py, team decides
-    # 3. make a ticket number with uuid.uuid4().hex
-    # 4. put the new game on the board (games dict): order, index, score, feedback
-    # 5. redirect to /game/{game_id}
-    pass
+    # Create a new game with shuffled questions and redirect to the first question.
+    questions = quiz.get_questions()
+    game_id = uuid.uuid4().hex
+    games[game_id] = {
+        "questions": questions,
+        "options": quiz.shuffled_options(questions[0]),
+        "index": 0,
+        "score": 0,
+        "feedback": None,  # None until the current question is answered
+        "finished": False,
+    }
+    return RedirectResponse(f"/game/{game_id}", status_code=303)
 
 
 @app.get("/game/{game_id}")
 def show_question(game_id: str):
-    """Show the current question, plus correct/wrong after a tap."""
-    # 1. find the game with find_game()
-    # 2. if the game is finished -> redirect to the result page
-    # 3. get the current question                   <- quiz.py
-    # FRONT END LATER: show question.html
-    pass
+    # Show the current question, including feedback once it has been answered.
+    game = find_game(game_id)
+    if game["finished"]:
+        return RedirectResponse(f"/game/{game_id}/result", status_code=303)
+
+    question = current_question(game)
+    # TODO (front end): render question.html
+    return {
+        "game_id": game_id,
+        "number": game["index"] + 1,
+        "total": len(game["questions"]),
+        "question": question["question"],
+        "options": game["options"],
+        "feedback": game["feedback"],
+        "score": game["score"],
+    }
 
 
 @app.post("/game/{game_id}/answer")
 def answer(game_id: str, choice: str = Form(...)):
-    """An option button was tapped."""
-    # 1. find the game
-    # 2. only if not answered yet: check the choice  <- quiz.py
-    # 3. if correct: add 1 to the score
-    # 4. remember the feedback (correct or wrong)
-    # 5. redirect back to the question page
-    pass
+    # Check the selected option and store the result.
+    # Only the first answer per question is counted.
+
+    game = find_game(game_id)
+
+    if game["feedback"] is None and not game["finished"]:
+        question = current_question(game)
+        correct = quiz.is_correct(question, choice)
+        if correct:
+            game["score"] += 1
+        game["feedback"] = {
+            "choice": choice,
+            "correct": correct,
+            "right_answer": question["answer"],
+        }
+
+    return RedirectResponse(f"/game/{game_id}", status_code=303)
 
 
 @app.post("/game/{game_id}/next")
 def next_question(game_id: str):
-    """Next button pressed."""
-    # 1. find the game
-    # 2. move to the next question, clear the feedback
-    # 3. if no questions are left: save the score    <- storage.py
-    #    and redirect to the result page
-    # 4. otherwise redirect to the question page
-    pass
+    # Advance to the next question, or finish the game and save the score.
+    game = find_game(game_id)
+
+    # Ignore the request if the question is unanswered or the game is already over.
+    if game["feedback"] is None or game["finished"]:
+        return RedirectResponse(f"/game/{game_id}", status_code=303)
+
+    game["index"] += 1
+    game["feedback"] = None
+
+    if game["index"] >= len(game["questions"]):
+        game["finished"] = True
+        storage.save_score(game["score"])
+        return RedirectResponse(f"/game/{game_id}/result", status_code=303)
+
+    # Shuffle once per question so the option order stays stable on reload.
+    game["options"] = quiz.shuffled_options(current_question(game))
+    return RedirectResponse(f"/game/{game_id}", status_code=303)
 
 
 @app.get("/game/{game_id}/result")
 def result(game_id: str):
-    """Final score and the highscore."""
-    # 1. find the game
-    # 2. get the highscore                           <- storage.py
-    # FRONT END LATER: show result.html
-    pass
+    # Show the final score and the current highscore.
+    game = find_game(game_id)
+    # TODO (front end): render result.html
+    return {
+        "score": game["score"],
+        "total": len(game["questions"]),
+        "highscore": storage.get_high_score(),
+    }
