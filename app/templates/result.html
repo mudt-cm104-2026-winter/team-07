@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Result - Quiz Game</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <main>
+        <h1>Quiz finished</h1>
+        <p class="score">You scored {{ score }} out of {{ total }}</p>
+
+        <p class="highscore">Highscore: {{ highscore }}</p>
+
+        <form action="/start" method="post">
+            <button type="submit" class="primary">Play again</button>
+        </form>
+        <a href="/">Back to start</a>
+    </main>
+</body>
+
+</html>

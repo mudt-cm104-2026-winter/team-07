@@ -33,7 +33,7 @@ games = {}
 
 
 def find_game(game_id):
-    # Return the game for the given ID or respond with 404 if it does not exist.
+    # Return the game for the given ID, or respond with 404 if it does not exist.
     game = games.get(game_id)
     if game is None:
         raise HTTPException(status_code=404, detail="Game not found")
@@ -41,7 +41,7 @@ def find_game(game_id):
 
 
 def current_question(game):
-    """Return the question the player is currently on."""
+    # Return the question the player is currently on.
     return game["questions"][game["index"]]
 
 
@@ -49,10 +49,11 @@ def current_question(game):
 
 
 @app.get("/")
-def home():
+def home(request: Request):
     # Start page.
-    # TODO (front end): render index.html
-    return {"page": "start", "highscore": storage.get_high_score()}
+    return templates.TemplateResponse(
+        request, "index.html", {"highscore": storage.get_high_score()}
+    )
 
 
 @app.post("/start")
@@ -72,30 +73,32 @@ def start_game():
 
 
 @app.get("/game/{game_id}")
-def show_question(game_id: str):
+def show_question(request: Request, game_id: str):
     # Show the current question, including feedback once it has been answered.
     game = find_game(game_id)
     if game["finished"]:
         return RedirectResponse(f"/game/{game_id}/result", status_code=303)
 
     question = current_question(game)
-    # TODO (front end): render question.html
-    return {
-        "game_id": game_id,
-        "number": game["index"] + 1,
-        "total": len(game["questions"]),
-        "question": question["question"],
-        "options": game["options"],
-        "feedback": game["feedback"],
-        "score": game["score"],
-    }
+    return templates.TemplateResponse(
+        request,
+        "question.html",
+        {
+            "game_id": game_id,
+            "number": game["index"] + 1,
+            "total": len(game["questions"]),
+            "question": question["question"],
+            "options": game["options"],
+            "feedback": game["feedback"],
+            "score": game["score"],
+        },
+    )
 
 
 @app.post("/game/{game_id}/answer")
 def answer(game_id: str, choice: str = Form(...)):
     # Check the selected option and store the result.
     # Only the first answer per question is counted.
-
     game = find_game(game_id)
 
     if game["feedback"] is None and not game["finished"]:
@@ -135,12 +138,15 @@ def next_question(game_id: str):
 
 
 @app.get("/game/{game_id}/result")
-def result(game_id: str):
+def result(request: Request, game_id: str):
     # Show the final score and the current highscore.
     game = find_game(game_id)
-    # TODO (front end): render result.html
-    return {
-        "score": game["score"],
-        "total": len(game["questions"]),
-        "highscore": storage.get_high_score(),
-    }
+    return templates.TemplateResponse(
+        request,
+        "result.html",
+        {
+            "score": game["score"],
+            "total": len(game["questions"]),
+            "highscore": storage.get_high_score(),
+        },
+    )
