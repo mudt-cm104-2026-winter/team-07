@@ -30,7 +30,7 @@ No real names: this repository is public. -->
 |---|---|
 | TownMax | `main.py`: web routes and game state |
 | Pierrmon | `quiz.py`: questions, shuffling and answer checking |
-| Ventspils | `storage.py`:                    |
+| Ventspils | `storage.py`: highscore persistence in 'data.json' |
 |---|---|
 
 ## How we work
