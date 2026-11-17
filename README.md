@@ -42,14 +42,10 @@ No real names: this repository is public. -->
 -->
 
 ## Sources
-
-<!-- One entry per source, added on the day you use it:
-- 2026-11-05: <title or link>, used for <what>
--->
+- 2026-11-10: Python documentation, used for understanding how routing between web pages works
+- 2026-11-10: Google search on how FastAPI handles forms, used for understanding how the buttons send data to the routes
 
 ## Use of AI
-
-<!-- One entry per use, added on the day you use it:
-- 2026-11-05: <tool>, used for <what>, checked by <how you checked the result>
-"none" is a valid entry.
--->
+- 2026-11-10: Claude, used for explaining and planning the routes in main.py, checked by testing every route in /docs
+- 2026-11-13: Claude, used for suggesting changes to quiz.py so main.py can use it, checked by running the terminal game and the web routes
+- 2026-11-15: Claude, used for the HTML templates and CSS, checked by playing full games in the browser (desktop and mobile view)
