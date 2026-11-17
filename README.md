@@ -46,6 +46,7 @@ No real names: this repository is public. -->
 <!-- One entry per source, added on the day you use it:
 - 2026-11-05: <title or link>, used for <what>
 -->
+- 2026-11-13: https://stackoverflow.com/questions/76406799/making-a-json-saving-system-for-my-python-game, used as a referance for storage.py
 
 ## Use of AI
 
@@ -53,3 +54,6 @@ No real names: this repository is public. -->
 - 2026-11-05: <tool>, used for <what>, checked by <how you checked the result>
 "none" is a valid entry.
 -->
+- 2026-11-13: Gemini, used for modifications of the storage.py code, the result was reviewed by Ventspils and later tested succesfully
+- 2026-11-13: Claude, used for modification of the quiz.py code, checked by Pierrmon by review and testing in the terminal
+- 2026-11-13: Claude, used for constricting the skeleton structure of the routing, reiewed by TownMax
