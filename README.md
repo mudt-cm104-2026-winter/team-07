@@ -1,11 +1,10 @@
-# Team project
+# Quiz Game 
 
-<!-- Replace the title with your project name. -->
+
 
 ## What this is
 
-<!-- One or two sentences: what does your app do, and who is it for?
-Right now it is the example "Things to bring". Replace it with your topic. -->
+A multiple-choice quiz built with Python and FastAPI. Players answer a series of shuffled questions in the browser, get instant feedback after each answer, and see their final score next to the all-time highscore, which is saved to disk.
 
 ## How to run it
 
@@ -20,16 +19,18 @@ uvicorn app.main:app --reload
 
 Then open http://127.0.0.1:8000 in your browser. Stop it with `Ctrl+C`.
 
-The entries are kept in memory: after a restart the list is empty again.
+The `json` module reads and writes the highscore in `data.json`. Because the file is on disk, the highscore survives a restart, while games in progress (kept in memory) are lost.
 
 ## Team
 
 <!-- One row per person: GitHub username and what you mainly take care of.
 No real names: this repository is public. -->
 
-| GitHub | Role |
-|Ventspils|gamer|
-|Pierrmon|Italian|
+| GitHub | Mainly takes care of |
+|---|---|
+| TownMax | `main.py`: web routes and game state |
+| Pierrmon | `quiz.py`: questions, shuffling and answer checking |
+| Ventspils | `storage.py`:                    |
 |---|---|
 
 ## How we work
@@ -40,6 +41,19 @@ No real names: this repository is public. -->
 - the author merges after the approval
 - every pull request adds a line to CHANGELOG.md
 -->
+How the team worked:
+
+
+- created and assigned issues to each member before starting the project
+- one branch per issue, named after it
+- while working on an issue, the issue was moved from "Todo" to "In Progress" by the member working on it
+- when an issue was solved, it was then closed and moved to the "Done" column on the board.
+- after solving an issue, the respective branch was deleted 
+- Main branch was protected, nobody could push to it directly.
+- every pull request needs one approval from another team member
+- the author merges after the approval
+
+
 
 ## Sources
 
